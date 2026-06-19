@@ -33,7 +33,7 @@ Confirmed operations on the validation target:
 * CAN FD frames (FDF + BRS) and classic frames, 11-bit and 29-bit identifiers
 * Nominal 500 kbit/s + data 2 Mbit/s at FCAN = 20 MHz, 80% sample point
 * Blocking transmit (TX queue) and blocking / polled receive (RX FIFO)
-* Optional interrupt/event layer: the RX-available and RX-overflow event path is
+* Optional interrupt/event layer: the RX-available and RX-overflow event paths are
   hardware-validated; bus status (error counters / state / bus-off) is queried
   synchronously via `dspic33ak_canfd_get_status()`. TX-complete (`tx_start`) is
   present in the API but **experimental** — its TX interrupt path is not yet

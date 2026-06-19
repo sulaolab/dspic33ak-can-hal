@@ -45,10 +45,12 @@ The application also owns the **message RAM** region (4-byte aligned,
 
 ## Interrupt/event layer (`_isr`)
 
-Additive and opt-in; the blocking core works without it. It provides an event
-callback (RX-available / TX-complete / bus-off / RX-overflow / invalid-message),
-`isr_enable/disable`, an async `tx_start`, and a synchronous `get_status`
-(CxTREC decode: TEC/REC, error-warning, error-passive, bus-off).
+Additive and opt-in; the blocking core works without it. Its API surface
+includes an event callback (the event bit-flags cover RX-available, RX-overflow,
+bus-off, plus TX-complete / bus-error / invalid-message), `isr_enable/disable`,
+an experimental `tx_start`, and a synchronous `get_status` (CxTREC decode:
+TEC/REC, error-warning, error-passive, bus-off). Which of those are actually
+armed/validated is spelled out next.
 
 **Validation status (phase 1).** `isr_enable` arms only the RX-not-empty and
 RX-overflow sources; the RX-available path is hardware-validated. Bus-error
