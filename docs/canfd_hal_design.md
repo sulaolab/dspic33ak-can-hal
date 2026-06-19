@@ -50,6 +50,16 @@ callback (RX-available / TX-complete / bus-off / RX-overflow / invalid-message),
 `isr_enable/disable`, an async `tx_start`, and a synchronous `get_status`
 (CxTREC decode: TEC/REC, error-warning, error-passive, bus-off).
 
+**Validation status (phase 1).** `isr_enable` arms only the RX-not-empty and
+RX-overflow sources; the RX-available path is hardware-validated. Bus-error
+(CERR) and invalid-message (IVM) are *not* armed — on this device they are
+delivered on additional CPU vectors this layer does not forward, so enabling
+them would trap; bus health is read synchronously through `get_status` instead,
+and `BUS_OFF` is derived from CxTREC inside `irq_handler`. `tx_start` /
+`TX_COMPLETE` is present in the API but **experimental**: arming the TXQ-empty
+interrupt currently traps on dsPIC33AK512MPS512, so blocking `transmit` is the
+validated TX path.
+
 **Separate CPU vectors.** On dsPIC33AK the CAN FD module raises *separate* CPU
 interrupt vectors: `CxRX` (receive FIFO), `CxTX` (transmit) and `Cx`
 (general/error). The RX-FIFO-not-empty interrupt arrives on **`_CxRXInterrupt`**,

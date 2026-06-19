@@ -81,10 +81,15 @@ dspic33ak_canfd_status_t dspic33ak_canfd_isr_set_callback(
     void *user_data);
 
 /**
- * Enable interrupts for an instance: RX-not-empty, RX-overflow, bus-error and
- * invalid-message sources, plus the top-level CPU interrupt at @p priority
- * (1..7). Call after dspic33ak_canfd_init(). TX-complete is armed per-transmit
- * by dspic33ak_canfd_tx_start(), not here.
+ * Enable interrupts for an instance: the RX-not-empty and RX-overflow sources,
+ * plus the top-level CPU interrupt at @p priority (1..7). Call after
+ * dspic33ak_canfd_init(). TX-complete is armed per-transmit by
+ * dspic33ak_canfd_tx_start(), not here.
+ *
+ * Bus-error (CERR) / invalid-message (IVM) sources are deliberately NOT armed:
+ * on dsPIC33AK they are delivered on separate CPU vectors this layer does not
+ * forward, so enabling them would trap. Bus health is queried synchronously via
+ * dspic33ak_canfd_get_status(), and BUS_OFF is derived from CxTREC in the handler.
  *
  * The HAL does NOT define the _CxInterrupt vector; the application owns it and
  * forwards to dspic33ak_canfd_irq_handler(inst).
@@ -102,8 +107,12 @@ dspic33ak_canfd_status_t dspic33ak_canfd_isr_disable(dspic33ak_canfd_instance_t 
 /**
  * Queue @p frame into the TX queue (same path as dspic33ak_canfd_transmit) and
  * arm the TXQ-empty interrupt so DSPIC33AK_CANFD_EVENT_TX_COMPLETE fires once
- * all queued frames have actually been transmitted on the bus. Returns once the
- * frame is queued; it does not wait for transmission.
+ * all queued frames have actually been transmitted on the bus.
+ *
+ * This is NOT fully asynchronous: it goes through dspic33ak_canfd_transmit(), so
+ * if the TX queue is full it first blocks for queue space (honoring the
+ * configured timeout). Once the frame is queued it returns without waiting for
+ * the frame to leave the bus.
  *
  * NOTE: the RX event path (isr_enable + RX_AVAILABLE) is HW-validated. The
  * TX-complete interrupt arming here is NOT yet validated on dsPIC33AK512MPS512 -

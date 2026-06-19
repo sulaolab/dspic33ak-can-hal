@@ -131,6 +131,11 @@ dspic33ak_canfd_status_t dspic33ak_canfd_init(dspic33ak_canfd_instance_t inst,
     if (config == NULL || config->msg_ram == NULL) {
         return DSPIC33AK_CANFD_ERR_INVALID_ARG;
     }
+    /* Message RAM is word-access only on this device; a misaligned base would
+     * fault with an address-error trap on the first object access. */
+    if (((uintptr_t)config->msg_ram & 3u) != 0u) {
+        return DSPIC33AK_CANFD_ERR_INVALID_ARG;
+    }
     if (config->msg_ram_size < MSG_RAM_BYTES) {
         return DSPIC33AK_CANFD_ERR_INVALID_ARG;
     }
@@ -153,6 +158,10 @@ dspic33ak_canfd_status_t dspic33ak_canfd_init(dspic33ak_canfd_instance_t inst,
     g_node[inst].get_ms = config->get_ms;
     g_node[inst].timeout_ms = config->timeout_ms;
     g_node[inst].initialized = false;
+    /* Invalidate any prior public state up-front, so a re-init that fails part
+     * way through cannot leave dspic33ak_canfd_is_initialized() reporting true
+     * while the node state says false. Restored to config->mode on success. */
+    dspic33ak_canfd_set_mode(inst, DSPIC33AK_CANFD_MODE_NONE);
 
     /* Enable module, enter configuration mode. */
     dspic33ak_canfd_reg_set(regs->CON, DSPIC33AK_CANFD_CON_ON);
@@ -385,6 +394,13 @@ dspic33ak_canfd_status_t dspic33ak_canfd_deinit(dspic33ak_canfd_instance_t inst)
     st = dspic33ak_canfd_get_regs(inst, &regs);
     if (st != DSPIC33AK_CANFD_OK) {
         return st;
+    }
+    /* Idempotent: if the instance was never initialized there is nothing to tear
+     * down, and the module clock may not be running — calling request_mode() here
+     * could spin forever when no timeout source is configured. */
+    if (!dspic33ak_canfd_is_initialized(inst)) {
+        g_node[inst].initialized = false;
+        return DSPIC33AK_CANFD_OK;
     }
     /* Request configuration mode then turn the module off. */
     (void)request_mode(inst, regs, DSPIC33AK_CANFD_OPMODE_CONFIG);

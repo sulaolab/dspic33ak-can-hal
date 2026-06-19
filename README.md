@@ -23,8 +23,9 @@ has been validated for:
 
 * Internal-loopback frame round-trip (no transceiver)
 * External-loopback through an external CAN transceiver
-* Two-board CAN FD bus communication, on CAN1 and CAN2
-* Interrupt-driven receive via the optional event layer
+* Two-board CAN FD bus communication on CAN1 (CAN2 is supported by the device
+  map but has not been hardware-validated yet)
+* Interrupt-driven receive (the RX-available event path) via the optional event layer
 * Runtime bit-rate change
 
 Confirmed operations on the validation target:
@@ -32,8 +33,12 @@ Confirmed operations on the validation target:
 * CAN FD frames (FDF + BRS) and classic frames, 11-bit and 29-bit identifiers
 * Nominal 500 kbit/s + data 2 Mbit/s at FCAN = 20 MHz, 80% sample point
 * Blocking transmit (TX queue) and blocking / polled receive (RX FIFO)
-* Optional interrupt/event layer: RX-available / TX-complete / bus-off / overflow
-  events, a synchronous bus-status (error counters / state) query
+* Optional interrupt/event layer: the RX-available and RX-overflow event path is
+  hardware-validated; bus status (error counters / state / bus-off) is queried
+  synchronously via `dspic33ak_canfd_get_status()`. TX-complete (`tx_start`) is
+  present in the API but **experimental** — its TX interrupt path is not yet
+  validated on this silicon — and bus-error / invalid-message are not delivered
+  as interrupts in this phase.
 * Bus-off detection and re-init recovery
 
 ## Design policy
@@ -169,8 +174,8 @@ Transfer:
 Optional event layer (`dspic33ak_canfd_isr.h`):
 
 * `dspic33ak_canfd_isr_set_callback()` / `dspic33ak_canfd_isr_enable()` / `_disable()`
-* `dspic33ak_canfd_tx_start()` / `dspic33ak_canfd_tx_is_busy()` / `_tx_abort()`
-* `dspic33ak_canfd_irq_handler()`  — call from the app-owned `_CxInterrupt`
+* `dspic33ak_canfd_tx_start()` / `dspic33ak_canfd_tx_is_busy()` / `_tx_abort()` (TX-complete experimental)
+* `dspic33ak_canfd_irq_handler()`  — call from the app-owned `_CxRXInterrupt`, `_CxTXInterrupt` and `_CxInterrupt` vectors
 * `dspic33ak_canfd_get_status()`   — decoded error counters / bus state
 
 ## Notes

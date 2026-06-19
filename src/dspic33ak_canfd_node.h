@@ -83,7 +83,15 @@ dspic33ak_canfd_status_t dspic33ak_canfd_set_bitrate(dspic33ak_canfd_instance_t 
                                                      uint32_t data_bps,
                                                      uint8_t  sample_pct);
 
-/** Blocking transmit of one frame via the TX queue. */
+/**
+ * Blocking transmit of one frame via the TX queue.
+ *
+ * CAN FD encodes only a fixed set of payload sizes (0..8, 12, 16, 20, 24, 32,
+ * 48, 64). frame->len may be any value 0..64: it is rounded UP to the next valid
+ * size and the added bytes are transmitted as zero. A receiver therefore sees
+ * the rounded length (e.g. len=9 is sent as a 12-byte frame). Pass an exact
+ * CAN FD size if you need the received length to match byte-for-byte.
+ */
 dspic33ak_canfd_status_t dspic33ak_canfd_transmit(dspic33ak_canfd_instance_t inst,
                                                   const dspic33ak_canfd_frame_t *frame);
 
