@@ -167,6 +167,8 @@ dspic33ak_canfd_status_t dspic33ak_canfd_init(dspic33ak_canfd_instance_t inst,
     dspic33ak_canfd_reg_set(regs->CON, DSPIC33AK_CANFD_CON_ON);
     st = request_mode(inst, regs, DSPIC33AK_CANFD_OPMODE_CONFIG);
     if (st != DSPIC33AK_CANFD_OK) {
+        /* Leave the module as we found it (off) on a failed bring-up. */
+        dspic33ak_canfd_reg_clear(regs->CON, DSPIC33AK_CANFD_CON_ON);
         return st;
     }
 
@@ -210,6 +212,8 @@ dspic33ak_canfd_status_t dspic33ak_canfd_init(dspic33ak_canfd_instance_t inst,
     /* Enter the requested operating mode. */
     st = request_mode(inst, regs, mode_to_reqop(config->mode));
     if (st != DSPIC33AK_CANFD_OK) {
+        /* Public mode is already NONE (cleared above); power the module back down. */
+        dspic33ak_canfd_reg_clear(regs->CON, DSPIC33AK_CANFD_CON_ON);
         return st;
     }
 
@@ -277,6 +281,10 @@ dspic33ak_canfd_status_t dspic33ak_canfd_transmit(dspic33ak_canfd_instance_t ins
     uint32_t ctrl;
 
     if (frame == NULL || frame->len > PAYLOAD_BYTES) {
+        return DSPIC33AK_CANFD_ERR_INVALID_ARG;
+    }
+    /* Classic CAN frames carry at most 8 data bytes; only CAN FD reaches 64. */
+    if (!frame->fd && frame->len > 8u) {
         return DSPIC33AK_CANFD_ERR_INVALID_ARG;
     }
     if (!dspic33ak_canfd_inst_is_valid(inst) || !g_node[inst].initialized) {

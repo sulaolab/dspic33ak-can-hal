@@ -36,7 +36,7 @@ typedef struct {
     bool     extended;  /**< true => 29-bit extended id (IDE) */
     bool     fd;        /**< true => CAN FD frame (FDF) */
     bool     brs;       /**< true => switch to data bit rate (FD only) */
-    uint8_t  len;       /**< payload length 0..64 */
+    uint8_t  len;       /**< payload length (classic: 0..8, CAN FD: 0..64) */
     uint8_t  data[64];
 } dspic33ak_canfd_frame_t;
 

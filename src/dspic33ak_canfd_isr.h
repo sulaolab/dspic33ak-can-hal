@@ -8,15 +8,15 @@
  * never has to include this header or compile dspic33ak_canfd_isr.c.
  *
  * This layer adds what an event-driven driver needs (and what a CMSIS-Driver CAN
- * wrapper maps onto): a user event callback, interrupt enable/disable, an async
- * "fire and forget" transmit with a TX-complete event, an ISR entry point the
- * application forwards its CAN vector to, and a synchronous bus-health query.
+ * wrapper maps onto): a user event callback, interrupt enable/disable, a queued
+ * transmit helper with an experimental TX-complete event, an ISR entry point the
+ * application forwards its CAN vectors to, and a synchronous bus-health query.
  * No ARM_CAN_* types appear here; those stay in the (future) CMSIS wrapper.
  *
  * Opt-in sequence:
  *   1. dspic33ak_canfd_init(...)              // basic init (node layer)
  *   2. dspic33ak_canfd_isr_set_callback(...)  // your event callback
- *   3. dspic33ak_canfd_isr_enable(inst, prio) // arm RX + TX + error interrupts
+ *   3. dspic33ak_canfd_isr_enable(inst, prio) // arm RX + RX-overflow interrupts
  *   4. forward the CAN vectors to dspic33ak_canfd_irq_handler(inst)
  *
  * NOTE (dsPIC33AK): the CAN FD module raises SEPARATE CPU interrupts for
