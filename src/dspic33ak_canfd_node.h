@@ -40,7 +40,18 @@ typedef struct {
     uint8_t  data[64];
 } dspic33ak_canfd_frame_t;
 
-/** Minimum message-RAM size (bytes) required by this HAL's fixed geometry. */
+/**
+ * Minimum message-RAM size (bytes) required by this HAL's fixed geometry
+ * (TX queue + RX FIFO 1, 4 objects each, 64-byte payload). Exposed as a
+ * compile-time constant so callers can size the static region they pass in:
+ *
+ *   static uint32_t can_ram[DSPIC33AK_CANFD_MSG_RAM_WORDS] __attribute__((aligned(4)));
+ *
+ * dspic33ak_canfd_msg_ram_size() returns the same value at runtime.
+ */
+#define DSPIC33AK_CANFD_MSG_RAM_BYTES   576u
+#define DSPIC33AK_CANFD_MSG_RAM_WORDS   ((DSPIC33AK_CANFD_MSG_RAM_BYTES + 3u) / 4u)
+
 uint16_t dspic33ak_canfd_msg_ram_size(void);
 
 /**

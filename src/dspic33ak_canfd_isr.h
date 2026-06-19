@@ -108,8 +108,9 @@ dspic33ak_canfd_status_t dspic33ak_canfd_isr_disable(dspic33ak_canfd_instance_t 
  * NOTE: the RX event path (isr_enable + RX_AVAILABLE) is HW-validated. The
  * TX-complete interrupt arming here is NOT yet validated on dsPIC33AK512MPS512 -
  * enabling it currently triggers an unhandled-interrupt trap, under
- * investigation. For now prefer the blocking dspic33ak_canfd_transmit() for TX
- * and use the RX events; this is reserved for the future CMSIS-Driver wrapper.
+ * investigation. Prefer the blocking dspic33ak_canfd_transmit() for TX and use
+ * the RX events; consumers that need a TX-complete signal (e.g. a CMSIS-Driver
+ * SEND_COMPLETE) should treat this as unavailable until it is validated.
  */
 dspic33ak_canfd_status_t dspic33ak_canfd_tx_start(dspic33ak_canfd_instance_t inst,
                                                   const dspic33ak_canfd_frame_t *frame);

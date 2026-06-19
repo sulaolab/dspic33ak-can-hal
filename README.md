@@ -22,8 +22,8 @@ This HAL is used in a larger board project; on the dsPIC33AK512MPS512 target it
 has been validated for:
 
 * Internal-loopback frame round-trip (no transceiver)
-* External-loopback through the on-board ATA6563 transceiver
-* Two-board CAN FD bus communication (originator / echo), CAN1 and CAN2
+* External-loopback through an external CAN transceiver
+* Two-board CAN FD bus communication, on CAN1 and CAN2
 * Interrupt-driven receive via the optional event layer
 * Runtime bit-rate change
 
@@ -103,7 +103,7 @@ The board layer enables the module, starts the CAN clock and maps the pins
 ```c
 #include "dspic33ak_canfd_node.h"
 
-static uint32_t can1_msg_ram[ (576u + 3u) / 4u ] __attribute__((aligned(4)));
+static uint32_t can1_msg_ram[DSPIC33AK_CANFD_MSG_RAM_WORDS] __attribute__((aligned(4)));
 
 dspic33ak_canfd_config_t cfg = {
     .can_clk_hz   = 20000000u,   /* FCAN provided by the board clock setup       */

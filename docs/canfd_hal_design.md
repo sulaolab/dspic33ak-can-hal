@@ -60,9 +60,9 @@ on FIFO overflow (frames then arrive in bursts of the FIFO depth).
 
 **Signal-only RX.** `irq_handler` signals `RX_AVAILABLE`; it does not drain the
 FIFO. The consumer drains with `dspic33ak_canfd_receive()`. If the read is
-deferred (e.g. a CMSIS-Driver-style "read in the RECEIVE event" model), drain the
-FIFO inside the callback into a software queue so the level-sensitive RX
-interrupt does not re-assert and starve the main loop.
+deferred to a later context (for example, draining from the main loop rather than
+inside the callback), drain the FIFO inside the callback into a software queue so
+the level-sensitive RX interrupt does not re-assert and starve the main loop.
 
 **Keep the callback short.** It runs in CAN ISR context; do not printf or call
 blocking APIs from it, and do not call the blocking `transmit()` from inside the

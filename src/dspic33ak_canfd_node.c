@@ -16,6 +16,10 @@
 #define OBJ_BYTES        (DSPIC33AK_CANFD_OBJ_HEADER_BYTES + PAYLOAD_BYTES) /* 72 */
 #define MSG_RAM_BYTES    ((TXQ_DEPTH + RX_DEPTH) * OBJ_BYTES)              /* 576 */
 
+/* Keep the public compile-time constant in lock-step with the actual geometry. */
+_Static_assert(DSPIC33AK_CANFD_MSG_RAM_BYTES == MSG_RAM_BYTES,
+               "DSPIC33AK_CANFD_MSG_RAM_BYTES must match the TXQ/RX FIFO geometry");
+
 #define DEFAULT_SAMPLE_PCT  80u
 
 typedef struct {
