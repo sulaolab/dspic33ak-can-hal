@@ -2,10 +2,11 @@
  * @file    dspic33ak_canfd_node.h
  * @brief   dsPIC33AK CAN FD HAL - node (transmit/receive) role API.
  *
- * Phase 1: blocking transmit via the TX queue and blocking/polled receive via
- * RX FIFO 1 with an accept-all filter. Interrupt-driven operation is added in a
- * later phase. The API is intentionally object/FIFO oriented so a CMSIS-Driver
- * CAN wrapper can map onto it without ARM_CAN_* types leaking into the HAL.
+ * Blocking transmit via the TX queue and blocking/polled receive via RX FIFO 1
+ * with an accept-all filter. The optional interrupt/event layer lives in
+ * dspic33ak_canfd_isr.* and is additive; this node layer remains the blocking
+ * core. The API is intentionally object/FIFO oriented so a CMSIS-Driver CAN
+ * wrapper can map onto it without ARM_CAN_* types leaking into the HAL.
  */
 #ifndef DSPIC33AK_CANFD_NODE_H
 #define DSPIC33AK_CANFD_NODE_H
