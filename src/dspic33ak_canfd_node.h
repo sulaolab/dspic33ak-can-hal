@@ -57,9 +57,8 @@ uint16_t dspic33ak_canfd_msg_ram_size(void);
 /**
  * Initialize and bring the instance up in config->mode.
  *
- * The caller must first perform the board-specific bring-up (the HAL deliberately
- * does not touch power/clock/pins):
- *   1) enable the module power (e.g. PMD3bits.C1MD = 0),
+ * The caller must first perform the board-specific bring-up:
+ *   1) enable the module with dspic33ak_canfd_module_enable(),
  *   2) start the CAN module clock so config->can_clk_hz is real (FCAN),
  *   3) assign the PPS. The CAN RX PPS input MUST be mapped even for INTERNAL
  *      loopback - otherwise the module cannot integrate and init returns

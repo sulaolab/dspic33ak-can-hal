@@ -70,6 +70,16 @@ dspic33ak_canfd_status_t dspic33ak_canfd_deinit(dspic33ak_canfd_instance_t inst)
 /** True if the instance exists on this device. */
 bool dspic33ak_canfd_is_present(dspic33ak_canfd_instance_t inst);
 
+/**
+ * Enable or disable the selected CAN FD module at the PMD gate.
+ *
+ * This only controls the peripheral module-disable bit. Board code still owns
+ * clock routing, PPS, and transceiver pins.
+ */
+dspic33ak_canfd_status_t dspic33ak_canfd_module_enable(
+    dspic33ak_canfd_instance_t inst,
+    bool enable);
+
 /** True if the instance has been initialized (mode != NONE). */
 bool dspic33ak_canfd_is_initialized(dspic33ak_canfd_instance_t inst);
 
