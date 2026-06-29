@@ -15,12 +15,13 @@ dspic33ak_canfd_isr.*    OPTIONAL interrupt/event layer (additive, opt-in)
 `_common.h` see the raw SFR names, so the public API stays free of XC-DSC / DFP
 bitfield types — the same policy as the other dsPIC33AK HALs.
 
-## Board responsibilities (NOT in the HAL)
+## Board responsibilities
 
-The HAL never touches power, clock or pins. Before `dspic33ak_canfd_init()` the
-board/application must:
+The HAL provides `dspic33ak_canfd_module_enable()` for the PMD gate, but clock
+and pin policy still live in the board/application. Before
+`dspic33ak_canfd_init()` the board/application must:
 
-1. Enable the module: `PMD3bits.CxMD = 0`.
+1. Enable the module: `dspic33ak_canfd_module_enable(inst, true)`.
 2. Provide the CAN module clock (FCAN). 20 MHz is the validated value
    (`config.can_clk_hz`); the bit-timing solver works for other clocks too.
 3. Map PPS: TX out, **RX in**, and drive the transceiver standby pin. The CAN

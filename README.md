@@ -56,10 +56,10 @@ This HAL is intentionally small.
 * Device-specific register symbols are isolated in a small per-instance pointer
   table (`dspic33ak_canfd_device.c`), built from `#if defined(C1CON)` presence
   tests, so it adapts to the device without device-name conditionals.
-* This HAL owns only the CAN FD module registers. It does NOT touch power
-  (`PMDx`), the CAN clock, or pins / PPS — the board layer does that before
-  `dspic33ak_canfd_init()` (including the RX PPS input, which must be mapped even
-  for internal loopback).
+* This HAL owns only the CAN FD module registers. It provides a small
+  `dspic33ak_canfd_module_enable()` helper for the PMD gate, but clock setup and
+  pins / PPS remain board responsibilities before `dspic33ak_canfd_init()`
+  (including the RX PPS input, which must be mapped even for internal loopback).
 * The application owns the message RAM region and passes it in; the HAL never
   statically allocates it.
 * The core (`_node`) is blocking and ISR-free. The optional interrupt/event
@@ -80,7 +80,7 @@ In scope:
 
 Out of scope (not handled here):
 
-* Power / clock / PPS bring-up — board layer
+* Clock / PPS bring-up — board layer
 * HAL-owned interrupt vectors (the application forwards them)
 * Configurable identifier filters beyond the accept-all RX filter
 * Transmit-event FIFO (TEF), timestamps, multi-FIFO object models
@@ -114,6 +114,8 @@ The board layer enables the module, starts the CAN clock and maps the pins
 #include "dspic33ak_canfd_node.h"
 
 static uint32_t can1_msg_ram[DSPIC33AK_CANFD_MSG_RAM_WORDS] __attribute__((aligned(4)));
+
+(void)dspic33ak_canfd_module_enable(DSPIC33AK_CANFD_INST_1, true);
 
 dspic33ak_canfd_config_t cfg = {
     .can_clk_hz   = 20000000u,   /* FCAN provided by the board clock setup       */
@@ -189,7 +191,8 @@ Optional event layer (`dspic33ak_canfd_isr.h`):
   core; the register layer uses 32-bit pointers, and message-RAM payloads are
   packed/unpacked as 32-bit words (byte access faults with an address-error
   trap).
-* This HAL is the CAN layer only; power/clock/PPS belong to the board layer.
+* This HAL is the CAN layer only; clock/PPS belong to the board layer. The PMD
+  module gate can be controlled through `dspic33ak_canfd_module_enable()`.
 * CMSIS-Driver CAN wrappers are intentionally kept in a separate repository
   (`dspic33ak-can-cmsis-driver`).
 * This repository does not include Microchip DFP header files.

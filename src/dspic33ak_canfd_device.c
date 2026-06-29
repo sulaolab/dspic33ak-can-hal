@@ -80,3 +80,36 @@ bool dspic33ak_canfd_instance_is_present(dspic33ak_canfd_instance_t inst)
 {
     return dspic33ak_canfd_get_device(inst) != NULL;
 }
+
+dspic33ak_canfd_status_t dspic33ak_canfd_module_enable(
+    dspic33ak_canfd_instance_t inst,
+    bool enable)
+{
+    if ((unsigned)inst >= (unsigned)DSPIC33AK_CANFD_INST_COUNT) {
+        return DSPIC33AK_CANFD_ERR_INVALID_ARG;
+    }
+    if (dspic33ak_canfd_get_device(inst) == NULL) {
+        return DSPIC33AK_CANFD_ERR_NOT_PRESENT;
+    }
+
+    switch (inst) {
+    case DSPIC33AK_CANFD_INST_1:
+#if defined(_C1MD)
+        _C1MD = enable ? 0u : 1u;
+        return DSPIC33AK_CANFD_OK;
+#else
+        break;
+#endif
+    case DSPIC33AK_CANFD_INST_2:
+#if defined(_C2MD)
+        _C2MD = enable ? 0u : 1u;
+        return DSPIC33AK_CANFD_OK;
+#else
+        break;
+#endif
+    default:
+        break;
+    }
+
+    return DSPIC33AK_CANFD_ERR_UNSUPPORTED;
+}
